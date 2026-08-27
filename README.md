@@ -57,6 +57,11 @@ Ensure you have Python 3.10 or newer installed. From a terminal:
    ```bash
    python -m pip install -r requirements.txt
    ```
+   On macOS, install the OpenMP runtime before running the notebook's XGBoost
+   comparison:
+   ```bash
+   brew install libomp
+   ```
 4. **Launch the server**:
    ```bash
    python -m streamlit run app.py
