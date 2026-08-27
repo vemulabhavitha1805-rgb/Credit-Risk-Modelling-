@@ -1,0 +1,12 @@
+# Python build and cache files
+__pycache__/
+*.py[cod]
+
+# Virtual environments and local Streamlit configuration
+.venv/
+venv/
+.streamlit/secrets.toml
+
+# Notebook checkpoints and operating-system metadata
+.ipynb_checkpoints/
+.DS_Store

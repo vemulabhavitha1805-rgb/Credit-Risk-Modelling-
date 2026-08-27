@@ -2,6 +2,10 @@ import streamlit as st
 import joblib
 import pandas as pd
 import numpy as np
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parent
 
 # Set premium page config
 st.set_page_config(
@@ -121,15 +125,16 @@ st.markdown("""
 # Load model and encoders once with caching to keep app fast
 @st.cache_resource
 def load_assets():
-    model = joblib.load("random_trees_credit_model.pkl")
+    """Load model artefacts from the directory containing this application."""
+    model = joblib.load(BASE_DIR / "random_trees_credit_model.pkl")
     encoders = {
-        "Sex": joblib.load("Sex_label_encoder.pkl"),
-        "Housing": joblib.load("Housing_label_encoder.pkl"),
-        "Saving accounts": joblib.load("Saving accounts_label_encoder.pkl"),
-        "Checking account": joblib.load("Checking account_label_encoder.pkl"),
-        "Purpose": joblib.load("Purpose_label_encoder.pkl")
+        "Sex": joblib.load(BASE_DIR / "Sex_label_encoder.pkl"),
+        "Housing": joblib.load(BASE_DIR / "Housing_label_encoder.pkl"),
+        "Saving accounts": joblib.load(BASE_DIR / "Saving accounts_label_encoder.pkl"),
+        "Checking account": joblib.load(BASE_DIR / "Checking account_label_encoder.pkl"),
+        "Purpose": joblib.load(BASE_DIR / "Purpose_label_encoder.pkl")
     }
-    target_encoder = joblib.load("target_encoder.pkl")
+    target_encoder = joblib.load(BASE_DIR / "target_encoder.pkl")
     return model, encoders, target_encoder
 
 try:

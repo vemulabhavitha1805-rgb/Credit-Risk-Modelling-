@@ -1,7 +1,5 @@
 # 💳 IntelliRisk | AI-Powered Credit Risk Predictive Platform
 
-![IntelliRisk Screenshot](file:///Users/bhavitha/.gemini/antigravity/brain/218f2674-fab7-4025-9c16-63f7e25b60ed/.system_generated/click_feedback/click_feedback_1779026452396.png)
-
 An end-to-end Machine Learning web application designed to evaluate credit applicant profiles and predict credit default risks ("Good" vs "Bad" risk). Built with **Streamlit** for a premium glassmorphic dark UI and backed by a robust **Random Forest Classification** model trained on the standard **German Credit Dataset**.
 
 ---
@@ -31,6 +29,8 @@ Credit-Risk-Modelling-/
 ├── Saving accounts_label_encoder.pkl
 ├── Checking account_label_encoder.pkl
 ├── Purpose_label_encoder.pkl
+├── requirements.txt                  # Runtime dependencies
+├── .gitignore                        # Local/cache file exclusions
 └── README.md                         # Project Documentation
 ```
 
@@ -42,20 +42,24 @@ The application is built on top of **Streamlit** and requires a Python 3 environ
 
 ### Prerequisites
 
-Ensure you have Python installed, along with the required libraries. If you are using the pre-configured virtual environment:
+Ensure you have Python 3.10 or newer installed. From a terminal:
 
-1. **Open your Terminal** (on macOS).
-2. **Navigate to the Project Folder**:
+1. **Navigate to the project folder**:
    ```bash
-   cd "/Users/bhavitha/Documents/Projects /Credit risk modelling /Credit-Risk-Modelling-"
+   cd Credit-Risk-Modelling-
    ```
-3. **Activate the Virtual Environment**:
+2. **Create and activate a virtual environment**:
    ```bash
-   source ../.venv/bin/activate
+   python3 -m venv .venv
+   source .venv/bin/activate
    ```
-4. **Launch the Server**:
+3. **Install dependencies**:
    ```bash
-   streamlit run app.py
+   python -m pip install -r requirements.txt
+   ```
+4. **Launch the server**:
+   ```bash
+   python -m streamlit run app.py
    ```
 5. **Open in Browser**: The terminal will print a local URL. Navigate to **[http://localhost:8501](http://localhost:8501)** to interact with your model!
 
