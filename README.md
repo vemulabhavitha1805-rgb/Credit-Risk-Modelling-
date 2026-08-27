@@ -30,6 +30,7 @@ Credit-Risk-Modelling-/
 ├── Checking account_label_encoder.pkl
 ├── Purpose_label_encoder.pkl
 ├── requirements.txt                  # Runtime dependencies
+├── tests/test_app.py                  # Dashboard smoke tests
 ├── .gitignore                        # Local/cache file exclusions
 └── README.md                         # Project Documentation
 ```
@@ -68,6 +69,18 @@ Ensure you have Python 3.10 or newer installed. From a terminal:
    ```
 5. **Open in Browser**: The terminal will print a local URL. Navigate to **[http://localhost:8501](http://localhost:8501)** to interact with your model!
 
+### Verify the project
+
+Run the dashboard smoke tests after installing the dependencies:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+The checks load the dashboard and run an assessment with both account fields set
+to **No Account**, which confirms the saved encoders and missing-value handling
+remain compatible.
+
 ---
 
 ## 🧠 Machine Learning Pipeline
@@ -86,6 +99,14 @@ Ensure you have Python 3.10 or newer installed. From a terminal:
 * Evaluated standard classification architectures (including Decision Trees, Random Forests, and XGBoost).
 * Fine-tuned a high-performing **Random Forest Classifier** via cross-validated Grid Search (`GridSearchCV`) to optimize accuracy and model robustness.
 * Serialized all components (`.pkl`) to guarantee zero feature-mismatch during runtime.
+
+### Responsible use
+
+IntelliRisk is an educational demonstration built from a small historical
+dataset. Its output is a model estimate, not a lending decision. Do not use it
+as the sole basis for approving, rejecting, pricing, or otherwise determining
+access to credit; a real deployment needs appropriate governance, validation,
+fairness review, monitoring, and human oversight.
 
 ---
 

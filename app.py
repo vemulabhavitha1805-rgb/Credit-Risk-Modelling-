@@ -6,6 +6,10 @@ from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent
+FEATURES = [
+    "Age", "Sex", "Job", "Housing", "Saving accounts", "Checking account",
+    "Credit amount", "Duration", "Purpose",
+]
 
 # Set premium page config
 st.set_page_config(
@@ -137,6 +141,34 @@ def load_assets():
     target_encoder = joblib.load(BASE_DIR / "target_encoder.pkl")
     return model, encoders, target_encoder
 
+
+def encode_value(value, encoder):
+    """Encode one UI value, including the missing-value class used at training."""
+    if pd.isna(value):
+        missing_values = [item for item in encoder.classes_ if pd.isna(item)]
+        if not missing_values:
+            raise ValueError("This model was not trained with a 'No Account' category.")
+        value = missing_values[0]
+    return encoder.transform([value])[0]
+
+
+def prepare_input(values, encoders, model):
+    """Create one encoded, correctly ordered row for model inference."""
+    frame = pd.DataFrame([values], columns=FEATURES)
+    for column, encoder in encoders.items():
+        frame[column] = encode_value(frame.at[0, column], encoder)
+
+    expected_features = list(getattr(model, "feature_names_in_", FEATURES))
+    if set(expected_features) != set(FEATURES):
+        raise ValueError("The saved model expects a different set of input features.")
+    return frame.loc[:, expected_features]
+
+
+def risk_probability(prediction, probabilities, model):
+    """Return the predicted class's probability without assuming class order."""
+    class_index = list(model.classes_).index(prediction)
+    return float(probabilities[class_index])
+
 try:
     model, encoders, target_encoder = load_assets()
 except Exception as e:
@@ -217,37 +249,34 @@ with left_col:
     # Center-aligned Analyze button
     btn_col1, btn_col2, btn_col3 = st.columns([1, 2, 1])
     with btn_col2:
-        predict_btn = st.button("RUN RISK ASSESSMENT", use_container_width=True)
+        predict_btn = st.button("RUN RISK ASSESSMENT", use_container_width=True, type="primary")
 
 with right_col:
     st.markdown('<div class="premium-card" style="height: 100%;">', unsafe_allow_html=True)
     st.markdown('<div class="card-title">📊 ASSESSMENT REALTIME OUTPUT</div>', unsafe_allow_html=True)
     
     if predict_btn:
-        # Create input dict utilizing exact feature keys and order matching model training
-        input_data = {
-            "Age": [age],
-            "Sex": [sex_map[sex]],
-            "Job": [job],
-            "Housing": [housing_map[housing]],
-            "Saving accounts": [saving_map[saving_account]],
-            "Checking account": [checking_map[checking_account]],
-            "Credit amount": [credit_amount],
-            "Duration": [duration],
-            "Purpose": [purpose_map[purpose]]
+        input_values = {
+            "Age": age,
+            "Sex": sex_map[sex],
+            "Job": job,
+            "Housing": housing_map[housing],
+            "Saving accounts": saving_map[saving_account],
+            "Checking account": checking_map[checking_account],
+            "Credit amount": credit_amount,
+            "Duration": duration,
+            "Purpose": purpose_map[purpose],
         }
-        
-        df_input = pd.DataFrame(input_data)
-        
-        # Apply label encoders
-        for col, encoder in encoders.items():
-            df_input[col] = encoder.transform(df_input[col])
-            
-        # Model predictions
-        pred = model.predict(df_input)[0]
-        probs = model.predict_proba(df_input)[0]
-        
-        translated_pred = target_encoder.inverse_transform([pred])[0]
+
+        try:
+            df_input = prepare_input(input_values, encoders, model)
+            pred = model.predict(df_input)[0]
+            probs = model.predict_proba(df_input)[0]
+            translated_pred = target_encoder.inverse_transform([pred])[0]
+            confidence = risk_probability(pred, probs, model)
+        except (ValueError, KeyError, TypeError) as error:
+            st.error(f"Unable to assess this profile: {error}")
+            st.stop()
         
         # Display Result elegantly
         if translated_pred == "good":
@@ -263,8 +292,8 @@ with right_col:
             
             # Confidence probability meter
             st.write("")
-            st.write(f"**Confidence score (Good Risk)**: `{probs[1]*100:.2f}%`")
-            st.progress(float(probs[1]))
+            st.write(f"**Confidence score (Good Risk)**: `{confidence * 100:.2f}%`")
+            st.progress(confidence)
             
         else:
             st.markdown(f"""
@@ -279,8 +308,8 @@ with right_col:
             
             # Confidence probability meter
             st.write("")
-            st.write(f"**Confidence score (Bad Risk)**: `{probs[0]*100:.2f}%`")
-            st.progress(float(probs[0]))
+            st.write(f"**Confidence score (Bad Risk)**: `{confidence * 100:.2f}%`")
+            st.progress(confidence)
             
         # Summary details inside card
         st.write("")
@@ -298,8 +327,12 @@ with right_col:
             <p style="font-size: 0.9rem; font-weight: 300;">Adjust applicant details on the left, then click <b>assessment button</b> to trigger machine learning analytics.</p>
         </div>
         """, unsafe_allow_html=True)
-        
+
     st.markdown('</div>', unsafe_allow_html=True)
+
+st.caption(
+    "Educational demonstration only. A model score must not be the sole basis for a real lending decision."
+)
 
 # Elegant Footer
 st.write("")
